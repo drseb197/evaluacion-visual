@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluación Visual Laboral v3</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f4f3ef;
+  color: #1a1a18;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+.container { max-width: 700px; margin: 0 auto; }
+
+.header {
+  display: flex; align-items: center; gap: 14px;
+  background: #fff; border: 0.5px solid #d3d1c7;
+  border-radius: 14px; padding: 1.25rem 1.5rem;
+  margin-bottom: 16px;
+}
+.header-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: #E6F1FB; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.header-icon svg { width: 22px; height: 22px; stroke: #185FA5; fill: none; stroke-width: 2; }
+.header-title { font-size: 18px; font-weight: 600; color: #1a1a18; }
+.header-sub { font-size: 13px; color: #888780; margin-top: 3px; }
+
+.progress-bar-wrap { background: #e8e7e2; border-radius: 100px; height: 5px; margin-bottom: 6px; }
+.progress-bar { background: #185FA5; border-radius: 100px; height: 5px; width: 0%; transition: width 0.3s; }
+.progress-label { font-size: 12px; color: #888780; text-align: right; margin-bottom: 16px; }
+
+.section-card {
+  background: #fff; border: 0.5px solid #d3d1c7;
+  border-radius: 14px; padding: 1.1rem 1.25rem; margin-bottom: 12px;
+}
+.section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.section-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: #f4f3ef; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; color: #5F5E5A; flex-shrink: 0; transition: all 0.2s;
+}
+.section-num.done { background: #EAF3DE; color: #27500A; }
+.section-title { font-size: 14px; font-weight: 600; color: #1a1a18; }
+.section-sub { font-size: 12px; color: #888780; margin-top: 2px; }
+
+.options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.opt-btn {
+  background: #f4f3ef; border: 1px solid #d3d1c7;
+  border-radius: 8px; padding: 10px 12px; cursor: pointer;
+  text-align: left; transition: all 0.15s; width: 100%;
+}
+.opt-btn:hover { background: #e8e7e2; border-color: #b4b2a9; }
+.opt-btn.sel-normal    { background: #EAF3DE; border-color: #639922; }
+.opt-btn.sel-funcional { background: #FAEEDA; border-color: #BA7517; }
+.opt-btn.sel-leve      { background: #FAEEDA; border-color: #BA7517; }
+.opt-btn.sel-moderado  { background: #FAECE7; border-color: #993C1D; }
+.opt-btn.sel-severo    { background: #FCEBEB; border-color: #A32D2D; }
+.opt-btn.sel-ausente   { background: #FCEBEB; border-color: #A32D2D; }
+.opt-label { font-size: 12px; font-weight: 600; color: #1a1a18; display: block; }
+.opt-range { font-size: 11px; color: #888780; margin-top: 2px; display: block; }
+
+.snellen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.eye-label { font-size: 12px; color: #5F5E5A; margin-bottom: 6px; font-weight: 600; }
+.snellen-opts { display: flex; flex-direction: column; gap: 5px; }
+.snellen-btn {
+  background: #f4f3ef; border: 1px solid #d3d1c7;
+  border-radius: 8px; padding: 8px 10px; cursor: pointer;
+  text-align: left; font-size: 12px; font-weight: 500; color: #1a1a18;
+  transition: all 0.15s; width: 100%;
+}
+.snellen-btn:hover { background: #e8e7e2; }
+.snellen-btn.sel-normal   { background: #EAF3DE; border-color: #639922; color: #27500A; }
+.snellen-btn.sel-leve     { background: #FAEEDA; border-color: #BA7517; color: #633806; }
+.snellen-btn.sel-moderado { background: #FAECE7; border-color: #993C1D; color: #712B13; }
+.snellen-btn.sel-severo   { background: #FCEBEB; border-color: #A32D2D; color: #501313; }
+
+.result-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; margin-top: 10px;
+}
+.pill-normal    { background: #C0DD97; color: #27500A; }
+.pill-funcional { background: #FAC775; color: #633806; }
+.pill-leve      { background: #FAC775; color: #633806; }
+.pill-moderado  { background: #F0997B; color: #4A1B0C; }
+.pill-severo    { background: #F7C1C1; color: #501313; }
+.pill-ausente   { background: #F7C1C1; color: #501313; }
+.result-text { font-size: 12px; color: #5F5E5A; margin-top: 6px; font-style: italic; line-height: 1.5; }
+
+.dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+.dot-normal    { background: #27500A; }
+.dot-funcional { background: #633806; }
+.dot-leve      { background: #633806; }
+.dot-moderado  { background: #4A1B0C; }
+.dot-severo    { background: #501313; }
+.dot-ausente   { background: #501313; }
+
+.divider { height: 0.5px; background: #d3d1c7; margin: 1.25rem 0 1rem; }
+.conclusion-label { font-size: 14px; font-weight: 600; color: #1a1a18; margin-bottom: 10px; }
+
+.conclusion-card {
+  border-radius: 14px; padding: 1.25rem 1.5rem;
+  border: 1.5px solid #d3d1c7; background: #f4f3ef;
+  transition: background 0.3s, border-color 0.3s;
+}
+.conclusion-card.apto          { background: #EAF3DE; border-color: #639922; }
+.conclusion-card.observaciones { background: #FAEEDA; border-color: #BA7517; }
+.conclusion-card.no-apto       { background: #FCEBEB; border-color: #A32D2D; }
+
+.conclusion-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px; border-radius: 100px; font-size: 13px; font-weight: 700; margin-bottom: 10px;
+}
+.badge-apto    { background: #C0DD97; color: #27500A; }
+.badge-obs     { background: #FAC775; color: #633806; }
+.badge-noApto  { background: #F7C1C1; color: #501313; }
+.badge-pending { background: #fff; color: #888780; border: 0.5px solid #b4b2a9; }
+
+.conclusion-text { font-size: 13px; color: #1a1a18; line-height: 1.7; }
+.conclusion-note { margin-top: 8px; font-size: 12px; color: #5F5E5A; font-style: italic; }
+
+.copy-btn {
+  display: none; margin-top: 12px;
+  background: rgba(0,0,0,0.07); border: none; border-radius: 8px;
+  padding: 7px 14px; cursor: pointer; font-size: 12px; font-weight: 500; color: #1a1a18;
+  transition: background 0.15s; align-items: center; gap: 6px;
+}
+.copy-btn:hover { background: rgba(0,0,0,0.13); }
+.copy-btn.visible { display: inline-flex; }
+
+.actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.reset-btn {
+  background: #fff; border: 0.5px solid #b4b2a9;
+  border-radius: 8px; padding: 9px 18px; cursor: pointer;
+  font-size: 13px; color: #5F5E5A; transition: all 0.15s;
+}
+.reset-btn:hover { background: #f4f3ef; color: #1a1a18; }
+.print-btn {
+  background: #185FA5; border: none;
+  border-radius: 8px; padding: 9px 18px; cursor: pointer;
+  font-size: 13px; color: #fff; font-weight: 600; transition: background 0.15s;
+}
+.print-btn:hover { background: #0C447C; }
+.footer { text-align: center; font-size: 11px; color: #b4b2a9; margin-top: 24px; padding-bottom: 1rem; }
+
+@media print {
+  body { background: #fff; padding: 0; }
+  .actions, .progress-bar-wrap, .progress-label { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/></svg>
+    </div>
+    <div>
+      <div class="header-title">Evaluación Visual Laboral</div>
+      <div class="header-sub">Selecciona el resultado de cada prueba para generar la conclusión automáticamente</div>
+    </div>
+  </div>
+
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+  <div class="progress-label" id="progress-label">0 de 6 pruebas completadas</div>
+
+  <!-- 1. SNELLEN -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num" id="num-snellen">1</div>
+      <div>
+        <div class="section-title">Tabla de Snellen — Agudeza visual</div>
+        <div class="section-sub">Selecciona el rango para cada ojo</div>
+      </div>
+    </div>
+    <div class="snellen-grid">
+      <div>
+        <div class="eye-label">Ojo derecho (OD)</div>
+        <div class="snellen-opts">
+          <button class="snellen-btn" data-eye="od" data-grade="normal"   onclick="selectSnellen(this)">20/20 – 20/25 · Normal</button>
+          <button class="snellen-btn" data-eye="od" data-grade="leve"     onclick="selectSnellen(this)">20/30 – 20/40 · Leve</button>
+          <button class="snellen-btn" data-eye="od" data-grade="moderado" onclick="selectSnellen(this)">20/50 – 20/70 · Moderada</button>
+          <button class="snellen-btn" data-eye="od" data-grade="severo"   onclick="selectSnellen(this)">≤20/80 · Severa</button>
+        </div>
+      </div>
+      <div>
+        <div class="eye-label">Ojo izquierdo (OI)</div>
+        <div class="snellen-opts">
+          <button class="snellen-btn" data-eye="oi" data-grade="normal"   onclick="selectSnellen(this)">20/20 – 20/25 · Normal</button>
+          <button class="snellen-btn" data-eye="oi" data-grade="leve"     onclick="selectSnellen(this)">20/30 – 20/40 · Leve</button>
+          <button class="snellen-btn" data-eye="oi" data-grade="moderado" onclick="selectSnellen(this)">20/50 – 20/70 · Moderada</button>
+          <button class="snellen-btn" data-eye="oi" data-grade="severo"   onclick="selectSnellen(this)">≤20/80 · Severa</button>
+        </div>
+      </div>
+    </div>
+    <div id="snellen-result" style="display:none;">
+      <div id="snellen-pill" class="result-pill"></div>
+      <div id="snellen-text" class="result-text"></div>
+    </div>
+  </div>
+
+  <!-- 2. ESTEREOSCOPÍA -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num" id="num-estereo">2</div>
+      <div>
+        <div class="section-title">Estereoscopía</div>
+        <div class="section-sub">Percepción tridimensional (segundos de arco)</div>
+      </div>
+    </div>
+    <div class="options-grid" id="group-estereo">
+      <button class="opt-btn" data-key="estereo" data-grade="normal"   data-label="Estereopsis fina normal"           data-result="Estereoscopía conservada (≤40 seg de arco)."           onclick="selectTest(this)">
+        <span class="opt-label">Fina normal</span><span class="opt-range">≤40 seg de arco</span>
+      </button>
+      <button class="opt-btn" data-key="estereo" data-grade="funcional" data-label="Estereopsis funcional"            data-result="Estereopsis funcional (40–100 seg de arco)."            onclick="selectTest(this)">
+        <span class="opt-label">Funcional</span><span class="opt-range">40–100 seg de arco</span>
+      </button>
+      <button class="opt-btn" data-key="estereo" data-grade="leve"     data-label="Disminución de la estereopsis"     data-result="Disminución de la estereopsis (>100 seg de arco)."      onclick="selectTest(this)">
+        <span class="opt-label">Disminuida</span><span class="opt-range">&gt;100 seg de arco</span>
+      </button>
+      <button class="opt-btn" data-key="estereo" data-grade="ausente"  data-label="Ausencia de visión estereoscópica" data-result="No presenta percepción estereoscópica."                  onclick="selectTest(this)">
+        <span class="opt-label">Sin percepción</span><span class="opt-range">No percibe</span>
+      </button>
+    </div>
+    <div id="estereo-result" style="display:none;">
+      <div id="estereo-pill" class="result-pill"></div>
+      <div id="estereo-text" class="result-text"></div>
+    </div>
+  </div>
+
+  <!-- 3. AMBLIOPÍA -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num" id="num-ambliopia">3</div>
+      <div>
+        <div class="section-title">Ambliopía</div>
+        <div class="section-sub">Diferencia de agudeza entre ambos ojos</div>
+      </div>
+    </div>
+    <div class="options-grid" id="group-ambliopia">
+      <button class="opt-btn" data-key="ambliopia" data-grade="normal"   data-label="Sin datos de ambliopía"    data-result="No se identifican datos de ambliopía."                                                          onclick="selectTest(this)">
+        <span class="opt-label">Sin ambliopía</span><span class="opt-range">Diferencia ≤1 línea</span>
+      </button>
+      <button class="opt-btn" data-key="ambliopia" data-grade="leve"     data-label="Sospecha de ambliopía"     data-result="Diferencia significativa de agudeza visual entre ambos ojos, sugestiva de ambliopía."            onclick="selectTest(this)">
+        <span class="opt-label">Sospecha</span><span class="opt-range">Diferencia ≥2 líneas</span>
+      </button>
+      <button class="opt-btn" data-key="ambliopia" data-grade="moderado" data-label="Compatible con ambliopía"  data-result="Agudeza ≤20/40 en un ojo sin corrección adecuada, compatible con ambliopía."                    onclick="selectTest(this)">
+        <span class="opt-label">Compatible</span><span class="opt-range">AV ≤20/40 en 1 ojo</span>
+      </button>
+    </div>
+    <div id="ambliopia-result" style="display:none;">
+      <div id="ambliopia-pill" class="result-pill"></div>
+      <div id="ambliopia-text" class="result-text"></div>
+    </div>
+  </div>
+
+  <!-- 4. ISHIHARA -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num" id="num-ishihara">4</div>
+      <div>
+        <div class="section-title">Test de Ishihara</div>
+        <div class="section-sub">Visión cromática rojo-verde</div>
+      </div>
+    </div>
+    <div class="options-grid" id="group-ishihara">
+      <button class="opt-btn" data-key="ishihara" data-grade="normal" data-label="Visión cromática normal"       data-result="Visión cromática normal (Ishihara 0–2 errores)."                                              onclick="selectTest(this)">
+        <span class="opt-label">Normal</span><span class="opt-range">0–2 errores</span>
+      </button>
+      <button class="opt-btn" data-key="ishihara" data-grade="leve"   data-label="Probable alteración leve"      data-result="Probable alteración leve en la percepción cromática (Ishihara 3–7 errores)."                  onclick="selectTest(this)">
+        <span class="opt-label">Alteración leve</span><span class="opt-range">3–7 errores</span>
+      </button>
+      <button class="opt-btn" data-key="ishihara" data-grade="severo" data-label="Discromatopsia significativa"  data-result="Alteración en la percepción de colores compatible con discromatopsia (más de 7 errores)."     onclick="selectTest(this)">
+        <span class="opt-label">Discromatopsia</span><span class="opt-range">&gt;7 errores</span>
+      </button>
+    </div>
+    <div id="ishihara-result" style="display:none;">
+      <div id="ishihara-pill" class="result-pill"></div>
+      <div id="ishihara-text" class="result-text"></div>
+    </div>
+  </div>
+
+  <!-- 5. DISCRIMINACIÓN DE COLOR -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-num" id="num-discrim">5</div>
+      <div>
+        <div class="section-title">Discriminación de color</div>
+        <div class="section-sub">Farnsworth u otro test complementario</div>
+      </div>
+    </div>
+    <div class="options-grid" id="group-discrim">
+      <button class="opt-btn" data-key="discrim" data-grade="normal" data-label="Discriminación cromática normal"   data-result="Discriminación de color conservada."                                    onclick="selectTest(this)">
+        <span class="opt-label">Normal</span><span class="opt-range">Sin alteraciones</span>
+      </button>
+      <button class="opt-btn" data-key="discrim" data-grade="leve"   data-label="Alteración leve"                   data-result="Discriminación cromática ligeramente disminuida."                       onclick="selectTest(this)">
+        <span class="opt-label">Alteración leve</span><span class="opt-range">Leve</span>
+      </button>
+      <button class="opt-btn" data-key="discrim" data-grade="severo" data-label="Déficit en discriminación de colores" data-result="Déficit en la discriminación de colores (alteración moderada-severa)." onclick="selectTest(this)">
+        <span class="opt-label">Alteración mod-severa</span><span class="opt-range">Moderada – Severa</span>
+      </button>
+    </div>
+    <div id="discrim-result" style="display:none;">
+      <div id="discrim-pill" class="result-pill"></div>
+      <div id="discrim-text" class="result-text"></div>
+    </div>
+  </div>
+
+  <!-- CONCLUSIÓN GLOBAL -->
+  <div class="divider"></div>
+  <div class="conclusion-label">Conclusión global</div>
+  <div class="conclusion-card" id="conclusion-card">
+    <div id="conclusion-badge" class="conclusion-badge badge-pending">Pendiente</div>
+    <div id="conclusion-text" class="conclusion-text">Selecciona el resultado de todas las pruebas para generar la conclusión automáticamente.</div>
+    <div id="conclusion-note" class="conclusion-note"></div>
+    <button class="copy-btn" id="copy-btn" onclick="copyConclusion()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Copiar conclusión
+    </button>
+  </div>
+
+  <div class="actions">
+    <button class="reset-btn" onclick="resetAll()">Reiniciar evaluación</button>
+    <button class="print-btn" onclick="window.print()">Imprimir / Guardar PDF</button>
+  </div>
+
+  <div class="footer">Evaluación Visual Laboral &nbsp;·&nbsp; Uso médico interno</div>
+</div>
+
+<script>
+// Estado — todos strings simples (null cuando no seleccionado)
+var S = { od: null, oi: null, estereo: null, ambliopia: null, ishihara: null, discrim: null };
+
+var RANK = { normal:0, funcional:1, leve:1, moderado:2, severo:3, ausente:3 };
+
+function worstGrade(a, b) {
+  if (!a) return b;
+  if (!b) return a;
+  return (RANK[a] >= RANK[b]) ? a : b;
+}
+
+function setPill(pillId, grade, label) {
+  var pillClass = {
+    normal:'pill-normal', funcional:'pill-funcional', leve:'pill-leve',
+    moderado:'pill-moderado', severo:'pill-severo', ausente:'pill-ausente'
+  }[grade] || 'pill-normal';
+  var dotClass = {
+    normal:'dot-normal', funcional:'dot-funcional', leve:'dot-leve',
+    moderado:'dot-moderado', severo:'dot-severo', ausente:'dot-ausente'
+  }[grade] || 'dot-normal';
+  var el = document.getElementById(pillId);
+  el.className = 'result-pill ' + pillClass;
+  el.innerHTML = '<span class="dot ' + dotClass + '"></span>&nbsp;' + label;
+}
+
+// ─── SNELLEN ────────────────────────────────────────────────────────
+function selectSnellen(btn) {
+  var eye   = btn.getAttribute('data-eye');
+  var grade = btn.getAttribute('data-grade');
+  S[eye] = grade;
+
+  // deseleccionar hermanos del mismo ojo
+  var all = document.querySelectorAll('.snellen-btn[data-eye="' + eye + '"]');
+  for (var i = 0; i < all.length; i++) all[i].className = 'snellen-btn';
+  btn.className = 'snellen-btn sel-' + grade;
+
+  renderSnellenResult();
+  updateProgress();
+  updateConclusion();
+}
+
+function renderSnellenResult() {
+  var resDiv = document.getElementById('snellen-result');
+  if (!S.od && !S.oi) { resDiv.style.display = 'none'; return; }
+  resDiv.style.display = 'block';
+
+  var worst = worstGrade(S.od, S.oi);
+  var labelMap = { normal:'Normal', leve:'Disminución leve', moderado:'Disminución moderada', severo:'Disminución severa' };
+  setPill('snellen-pill', worst, labelMap[worst] || worst);
+
+  var desc = { normal:'normal', leve:'leve', moderado:'moderada', severo:'severa' };
+  var msg;
+  if (S.od && S.oi) {
+    if (S.od === S.oi && S.od === 'normal') {
+      msg = 'Agudeza visual OD y OI dentro de parámetros normales.';
+    } else if (S.od === S.oi) {
+      msg = 'Disminución ' + desc[S.od] + ' de la agudeza visual bilateral.';
+    } else {
+      msg = 'Agudeza visual asimétrica: OD ' + desc[S.od] + ', OI ' + desc[S.oi] + '.';
+    }
+  } else {
+    msg = S.od
+      ? 'OD: agudeza visual ' + desc[S.od] + '. OI pendiente.'
+      : 'OI: agudeza visual ' + desc[S.oi] + '. OD pendiente.';
+  }
+  document.getElementById('snellen-text').textContent = msg;
+
+  var numEl = document.getElementById('num-snellen');
+  if (S.od && S.oi) numEl.classList.add('done'); else numEl.classList.remove('done');
+}
+
+// ─── TESTS GENERALES ───────────────────────────────────────────────
+function selectTest(btn) {
+  var key    = btn.getAttribute('data-key');
+  var grade  = btn.getAttribute('data-grade');
+  var label  = btn.getAttribute('data-label');
+  var result = btn.getAttribute('data-result');
+
+  S[key] = grade;   // guardar como string simple
+
+  // deseleccionar hermanos del mismo grupo
+  var group = document.getElementById('group-' + key);
+  var siblings = group.querySelectorAll('.opt-btn');
+  for (var i = 0; i < siblings.length; i++) siblings[i].className = 'opt-btn';
+  btn.className = 'opt-btn sel-' + grade;
+
+  document.getElementById(key + '-result').style.display = 'block';
+  setPill(key + '-pill', grade, label);
+  document.getElementById(key + '-text').textContent = result;
+  document.getElementById('num-' + key).classList.add('done');
+
+  updateProgress();
+  updateConclusion();
+}
+
+// ─── PROGRESO ──────────────────────────────────────────────────────
+function updateProgress() {
+  var done = 0;
+  if (S.od)       done++;
+  if (S.oi)       done++;
+  if (S.estereo)  done++;
+  if (S.ambliopia) done++;
+  if (S.ishihara)  done++;
+  if (S.discrim)   done++;
+  var pct = Math.round((done / 6) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = done + ' de 6 pruebas completadas';
+}
+
+// ─── CONCLUSIÓN ────────────────────────────────────────────────────
+function updateConclusion() {
+  var card    = document.getElementById('conclusion-card');
+  var badge   = document.getElementById('conclusion-badge');
+  var textEl  = document.getElementById('conclusion-text');
+  var noteEl  = document.getElementById('conclusion-note');
+  var copyBtn = document.getElementById('copy-btn');
+
+  // Todas las 6 selecciones deben estar presentes
+  var allDone = (S.od !== null) && (S.oi !== null) &&
+                (S.estereo !== null) && (S.ambliopia !== null) &&
+                (S.ishihara !== null) && (S.discrim !== null);
+
+  if (!allDone) {
+    card.className      = 'conclusion-card';
+    badge.className     = 'conclusion-badge badge-pending';
+    badge.textContent   = 'Pendiente';
+    textEl.textContent  = 'Selecciona el resultado de todas las pruebas para generar la conclusión automáticamente.';
+    noteEl.textContent  = '';
+    copyBtn.classList.remove('visible');
+    return;
+  }
+
+  // Construir hallazgos e issues
+  var issues   = [];   // 'leve', 'moderado', 'severo'
+  var findings = [];
+
+  // Snellen
+  var snellenWorst = worstGrade(S.od, S.oi);
+  var snDesc = { normal:'agudeza visual dentro de parámetros normales',
+                 leve:'disminución leve de la agudeza visual',
+                 moderado:'disminución moderada de la agudeza visual',
+                 severo:'disminución severa de la agudeza visual' };
+  findings.push(snDesc[snellenWorst]);
+  if (snellenWorst !== 'normal') issues.push(snellenWorst);
+
+  // Estereoscopía
+  if (S.estereo === 'normal') {
+    findings.push('adecuada visión estereoscópica');
+  } else if (S.estereo === 'funcional') {
+    findings.push('estereopsis funcional');
+    issues.push('leve');
+  } else if (S.estereo === 'leve') {
+    findings.push('disminución de la estereopsis');
+    issues.push('moderado');
+  } else if (S.estereo === 'ausente') {
+    findings.push('ausencia de visión estereoscópica');
+    issues.push('severo');
+  }
+
+  // Ambliopía
+  if (S.ambliopia === 'normal') {
+    findings.push('sin datos de ambliopía');
+  } else if (S.ambliopia === 'leve') {
+    findings.push('sospecha de ambliopía');
+    issues.push('moderado');
+  } else if (S.ambliopia === 'moderado') {
+    findings.push('datos compatibles con ambliopía');
+    issues.push('moderado');
+  }
+
+  // Cromatismo (Ishihara + discriminación)
+  var chromaWorst = worstGrade(S.ishihara, S.discrim);
+  if (chromaWorst === 'normal') {
+    findings.push('visión cromática y discriminación de colores conservadas');
+  } else if (chromaWorst === 'leve') {
+    findings.push('alteración leve en la visión cromática');
+    issues.push('leve');
+  } else {
+    findings.push('discromatopsia y/o déficit en discriminación cromática');
+    issues.push('severo');
+  }
+
+  // Veredicto
+  var hasSevero = (issues.indexOf('severo')   !== -1);
+  var noIssues  = (issues.length === 0);
+
+  var verdict, badgeClass, badgeText, conclusionText, noteText;
+
+  if (noIssues) {
+    verdict       = 'apto';
+    badgeClass    = 'badge-apto';
+    badgeText     = 'APTO';
+    conclusionText = 'Paciente con ' + findings.join(', ') + '. APTO para el puesto laboral.';
+    noteText       = '';
+  } else if (hasSevero) {
+    verdict       = 'no-apto';
+    badgeClass    = 'badge-noApto';
+    badgeText     = 'NO APTO';
+    conclusionText = 'Se identifican los siguientes hallazgos: ' + findings.join('; ') + '. NO APTO para actividades que requieren discriminación visual fina.';
+    noteText       = 'Se recomienda valoración oftalmológica especializada.';
+  } else {
+    verdict       = 'observaciones';
+    badgeClass    = 'badge-obs';
+    badgeText     = 'APTO con observaciones';
+    conclusionText = 'Se identifican los siguientes hallazgos: ' + findings.join('; ') + '. APTO con recomendación de valoración oftalmológica y corrección óptica de ser necesaria.';
+    noteText       = '';
+  }
+
+  card.className      = 'conclusion-card ' + verdict;
+  badge.className     = 'conclusion-badge ' + badgeClass;
+  badge.textContent   = badgeText;
+  textEl.textContent  = conclusionText;
+  noteEl.textContent  = noteText;
+  copyBtn._savedText  = conclusionText + (noteText ? ' ' + noteText : '');
+  copyBtn.classList.add('visible');
+}
+
+// ─── COPIAR ────────────────────────────────────────────────────────
+function copyConclusion() {
+  var btn  = document.getElementById('copy-btn');
+  var text = btn._savedText || document.getElementById('conclusion-text').textContent;
+  var orig = btn.innerHTML;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() { flashCopy(btn, orig); });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+    flashCopy(btn, orig);
+  }
+}
+function flashCopy(btn, orig) {
+  btn.textContent = '✓ Copiado';
+  setTimeout(function() { btn.innerHTML = orig; }, 2000);
+}
+
+// ─── RESET ─────────────────────────────────────────────────────────
+function resetAll() {
+  S = { od: null, oi: null, estereo: null, ambliopia: null, ishihara: null, discrim: null };
+
+  document.querySelectorAll('.snellen-btn').forEach(function(b) { b.className = 'snellen-btn'; });
+  document.querySelectorAll('.opt-btn').forEach(function(b)     { b.className = 'opt-btn'; });
+
+  ['snellen','estereo','ambliopia','ishihara','discrim'].forEach(function(k) {
+    var r = document.getElementById(k + '-result');
+    if (r) r.style.display = 'none';
+  });
+  ['snellen','estereo','ambliopia','ishihara','discrim'].forEach(function(k) {
+    var n = document.getElementById('num-' + k);
+    if (n) n.classList.remove('done');
+  });
+
+  document.getElementById('conclusion-card').className    = 'conclusion-card';
+  document.getElementById('conclusion-badge').className   = 'conclusion-badge badge-pending';
+  document.getElementById('conclusion-badge').textContent = 'Pendiente';
+  document.getElementById('conclusion-text').textContent  = 'Selecciona el resultado de todas las pruebas para generar la conclusión automáticamente.';
+  document.getElementById('conclusion-note').textContent  = '';
+
+  var copyBtn = document.getElementById('copy-btn');
+  copyBtn.classList.remove('visible');
+  copyBtn._savedText = '';
+
+  updateProgress();
+}
+</script>
+</body>
+</html>
